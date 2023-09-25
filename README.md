@@ -1,6 +1,6 @@
-# Sample Hardhat Project
+# Purchase NFT with ERC20 tokens
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+Bulld a classic NFT that can only be minted by paying with a particular ERC20 token.
 
 Try running some of the following tasks:
 
