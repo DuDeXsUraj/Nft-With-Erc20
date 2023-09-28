@@ -1,43 +1,39 @@
+// This contract is used for NFT minting with a fee in paymentToken
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./MyToken.sol";
+import "./Token.sol";
 
-contract MyNFT is ERC721, Ownable {
-    IERC20 public myToken;
-    uint256 public totalSupply;
+contract MyERC721NFT is ERC721Enumerable, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIdCounter;
 
-    constructor(address _tokenAddress) ERC721("MyNFT", "MNFT") {
-        myToken = IERC20(_tokenAddress);
+    IERC20 public paymentToken;
+    uint256 public mintingFee; // Fee in paymentToken required for minting
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address _paymentToken,
+        uint256 _mintingFee
+    ) ERC721(name, symbol) {
+        paymentToken = IERC20(_paymentToken);
+        mintingFee = _mintingFee;
     }
 
-    // Function to mint NFTs
-    function mint() external {
-        require(myToken.transferFrom(msg.sender, address(this), 1), "Transfer failed. Ensure you have approved the token.");
-
-        uint256 tokenId = totalSupply + 1;
-
-        // Check if the caller is a contract
-        if (isContract(msg.sender)) {
-            // Mint the NFT to the contract itself
-            _mint(msg.sender, tokenId);
-        } else {
-            // Mint the NFT to the caller (EOA)
-            _mint(msg.sender, tokenId);
-        }
-
-        totalSupply++;
+    function setMintingFee(uint256 _newFee) external onlyOwner {
+        mintingFee = _newFee;
     }
 
-    // Function to check if an address is a contract
-    function isContract(address _addr) internal view returns (bool) {
-        uint32 size;
-        assembly {
-            size := extcodesize(_addr)
-        }
-        return (size > 0);
+    function mintNFT() external {
+        require(paymentToken.transferFrom(msg.sender, address(this), mintingFee), "Fee transfer failed");
+        
+        _mint(msg.sender, _tokenIdCounter.current());
+        _tokenIdCounter.increment();
     }
 }
+
