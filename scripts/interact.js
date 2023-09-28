@@ -6,8 +6,8 @@ async function main() {
   console.log(`Deployer's address: ${deployer.address}`);
 
   // Replace with the addresses of your deployed contracts
-  const tokenAddress = "0xe660f73Cf5554Cb7c9B06780F9BC1B08134e3eDc";
-  const nftAddress = "0x127B9f60ad727069A6A6176E46bBD4CE53B9AB7E";
+  const tokenAddress = "0xF648B32f58c3d008c3ebEb7f92Fb38a5eA38a2cd";
+  const nftAddress = " 0xd3F9292081674c56dAE1E1fF5eACc748c7745A57";
 
   const MyToken = await ethers.getContractFactory("MyToken");
   const myToken = MyToken.attach(tokenAddress);
@@ -21,6 +21,7 @@ async function main() {
 
   // Mint the NFT
   const mintTx = await myNFT.mint();
+
   await mintTx.wait();
 
   console.log("NFT minted successfully!");

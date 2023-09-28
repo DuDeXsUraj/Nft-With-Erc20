@@ -1,39 +1,23 @@
-// This contract is used for NFT minting with a fee in paymentToken
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./Token.sol";
+import "./MyToken.sol";
 
-contract MyERC721NFT is ERC721Enumerable, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIdCounter;
+contract MyNFT is ERC721, Ownable {
+    IERC20 public erc20Token;
+    uint256 public tokenIdCounter;
 
-    IERC20 public paymentToken;
-    uint256 public mintingFee; // Fee in paymentToken required for minting
-
-    constructor(
-        string memory name,
-        string memory symbol,
-        address _paymentToken,
-        uint256 _mintingFee
-    ) ERC721(name, symbol) {
-        paymentToken = IERC20(_paymentToken);
-        mintingFee = _mintingFee;
+    constructor(address _erc20TokenAddress) ERC721("MyNFT", "MNFT") {
+        erc20Token = IERC20(_erc20TokenAddress);
+        tokenIdCounter = 0;
     }
 
-    function setMintingFee(uint256 _newFee) external onlyOwner {
-        mintingFee = _newFee;
-    }
-
-    function mintNFT() external {
-        require(paymentToken.transferFrom(msg.sender, address(this), mintingFee), "Fee transfer failed");
-        
-        _mint(msg.sender, _tokenIdCounter.current());
-        _tokenIdCounter.increment();
+    function mintNFT(uint256 price) external {
+        require(erc20Token.transferFrom(msg.sender, address(this), price), "Transfer failed");
+        _safeMint(msg.sender, tokenIdCounter);
+        tokenIdCounter++;
     }
 }
-
